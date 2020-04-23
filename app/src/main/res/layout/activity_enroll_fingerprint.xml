@@ -26,4 +26,13 @@
         android:layout_centerHorizontal="true"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
 
+    <Button
+        android:id="@+id/btn_touch_sensor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/pro_enroll_fingerprint_progress"
+        android:layout_marginTop="40dp"
+        android:text="@string/touch_sensor"/>
+
 </RelativeLayout>

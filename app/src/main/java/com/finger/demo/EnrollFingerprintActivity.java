@@ -1,7 +1,5 @@
 package com.finger.demo;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
@@ -10,13 +8,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class EnrollFingerprintActivity extends Activity {
 
     final String TAG = "EnrollFingerprintActivity";
-    final int TOTAL_ENROLL_NUM = 15;
+    final int TOTAL_ENROLL_NUM = 20;
     final int UPDATE_ENROLL_FINGERPRINT_PROGRESS = 1000;
     final int ENROLL_FINGERPRINT_SUCCESS = 1001;
 
@@ -26,6 +26,7 @@ public class EnrollFingerprintActivity extends Activity {
     private Handler handler;
 
     private TextView tvEnrollFingerprintHint;
+    Button btnTouchSensor;
     private ProgressBar enrollProgress;
 
     @Override
@@ -35,6 +36,7 @@ public class EnrollFingerprintActivity extends Activity {
 
         fingerPrintManager = this.getSystemService(FingerprintManager.class);
         tvEnrollFingerprintHint = (TextView) findViewById(R.id.tv_enroll_fingerprint_hint);
+        btnTouchSensor = (Button) findViewById(R.id.btn_touch_sensor);
         enrollProgress = (ProgressBar) findViewById(R.id.pro_enroll_fingerprint_progress);
         enrollProgress.setMax(TOTAL_ENROLL_NUM);
 
@@ -72,6 +74,13 @@ public class EnrollFingerprintActivity extends Activity {
         //此数组暂时拿不到，通过修改so库跳过这部分检验，现在随便传参即可
         byte[] bytes = new byte[100];
         fingerPrintManager.enroll(bytes,cancellationSignal,0, UserHandle.myUserId(),enrollmentCallback);
+
+        btnTouchSensor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fingerPrintManager.postEnroll();
+            }
+        });
 
     }
 

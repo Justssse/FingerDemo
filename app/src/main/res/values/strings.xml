@@ -21,5 +21,6 @@
 
     <string name="enroll_fingerprint_title">将您的手指放在传感器上，感觉到振动后移开手指</string>
     <string name="enroll_fingerprint_success">指纹添加成功</string>
+    <string name="touch_sensor">模拟点击指纹传感器</string>
 
 </resources>
