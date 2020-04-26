@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.fingerprint.Fingerprint;
-import android.hardware.fingerprint.FingerprintManager;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -85,9 +84,9 @@ public class FingerprintHomeActivity extends Activity {
     //初始化相关数据
     void initData(){
         handler = new MyHandler();
-        fingerprints = new ArrayList<>(5);
+        fingerprints = new ArrayList<>();
 
-        fingerPrintManager = this.getSystemService(FingerprintManager.class);
+        fingerPrintManager = new FingerprintManager();
         authenticationCallback = new FingerprintManager.AuthenticationCallback() {
             @Override
             public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
@@ -145,33 +144,61 @@ public class FingerprintHomeActivity extends Activity {
             }
         });
         mRvFingerprintList.setAdapter(mFingerPrintAdapter);
+        mFingerPrintAdapter.setFingerprintList(fingerprints);
+        mFingerPrintAdapter.notifyDataSetChanged();
 
     }
 
     //指纹数据有变化后，刷新指纹列表
     void refreshLayout(){
-        fingerprints = fingerPrintManager.getEnrolledFingerprints();
 
-        if (fingerprints != null && fingerprints.size() > 0){
-            if (fingerprints.size() >= 5){
-                mBtnEnroll.setEnabled(false);
-                mBtnEnroll.setText(String.format(getString(R.string.enroll_fingerprint_max_num),MAX_FINGERPRINT_NUM));
-            }else {
-                mBtnEnroll.setEnabled(true);
-                mBtnEnroll.setText(R.string.enroll_fingerprint);
+        fingerprints.clear();
+        fingerPrintManager.enumerate(0, new FingerprintManager.EnumerateCallback() {
+            @Override
+            void onEnumerate(Fingerprint fingerprint) {
+                super.onEnumerate(fingerprint);
+
+                Log.d(TAG,"onEnumerate id: " + fingerprint.getFingerId());
+                if (fingerprints.contains(fingerprint)){
+                    return;
+                }
+                fingerprints.add(fingerprint);
             }
-            mTvInformation.setVisibility(View.GONE);
-            mRvFingerprintList.setVisibility(View.VISIBLE);
-            mFingerPrintAdapter.setFingerprintList(fingerprints);
-            mFingerPrintAdapter.notifyDataSetChanged();
 
-        }else {
-            //全部指纹都删除完了
-            mTvInformation.setText(R.string.no_enrolled_fingerprint);
-            mRvFingerprintList.setVisibility(View.GONE);
-            mBtnEnroll.setVisibility(View.VISIBLE);
-            mTvInformation.setVisibility(View.VISIBLE);
-        }
+            @Override
+            void onEnumerateComplete() {
+                super.onEnumerateComplete();
+
+                Log.d(TAG,"onEnumerateComplete: " + fingerprints);
+                if (fingerprints != null && fingerprints.size() > 0){
+                    if (fingerprints.size() >= 5){
+                        mBtnEnroll.setEnabled(false);
+                        mBtnEnroll.setText(String.format(getString(R.string.enroll_fingerprint_max_num),MAX_FINGERPRINT_NUM));
+                    }else {
+                        mBtnEnroll.setEnabled(true);
+                        mBtnEnroll.setText(R.string.enroll_fingerprint);
+                    }
+                    mTvInformation.setVisibility(View.GONE);
+                    mRvFingerprintList.setVisibility(View.VISIBLE);
+                    mFingerPrintAdapter.setFingerprintList(fingerprints);
+                    mFingerPrintAdapter.notifyDataSetChanged();
+
+                }else {
+                    //全部指纹都删除完了
+                    mTvInformation.setText(R.string.no_enrolled_fingerprint);
+                    mRvFingerprintList.setVisibility(View.GONE);
+                    mBtnEnroll.setVisibility(View.VISIBLE);
+                    mTvInformation.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            void onEnumerateError(int errMsgId, CharSequence errString) {
+                super.onEnumerateError(errMsgId, errString);
+
+                Log.d(TAG,"onEnumerateError: " + errString);
+            }
+        });
 
     }
 
@@ -206,7 +233,7 @@ public class FingerprintHomeActivity extends Activity {
     //确认删除操作
     void ensureRemove(Fingerprint fingerprint){
 
-        fingerPrintManager.remove(fingerprint, UserHandle.myUserId(),removalCallback);
+/*        fingerPrintManager.remove(fingerprint, UserHandle.myUserId(),removalCallback);
 
         //TODO RemovalCallback莫名奇妙就不回调了？？？？？暂时使用延时刷新界面(问题找到，用的是7.1的framework)
         mRvFingerprintList.postDelayed(new Runnable() {
@@ -214,7 +241,7 @@ public class FingerprintHomeActivity extends Activity {
             public void run() {
                 handler.obtainMessage(FINGERPRINT_REMOVE_SUCCESS).sendToTarget();
             }
-        },300);
+        },300);*/
 
     }
 
@@ -251,13 +278,13 @@ public class FingerprintHomeActivity extends Activity {
 
     //执行重命名的操作
     void ensureRename(int fingerId, String newName){
-        fingerPrintManager.rename(fingerId,UserHandle.myUserId(),newName);
+/*        fingerPrintManager.rename(fingerId,UserHandle.myUserId(),newName);
         mRvFingerprintList.postDelayed(new Runnable() {
             @Override
             public void run() {
                 handler.obtainMessage(FINGERPRINT_RENAME_SUCCESS).sendToTarget();
             }
-        },300);
+        },300);*/
     }
 
     //主界面提示当前识别的手指
@@ -293,6 +320,7 @@ public class FingerprintHomeActivity extends Activity {
     class MyHandler extends Handler{
         @Override
         public void handleMessage(Message msg) {
+            Log.d(TAG,"收到消息msg.what: " + msg.what);
             switch (msg.what){
                 case FINGERPRINT_REMOVE_SUCCESS:
                     refreshLayout();
@@ -317,7 +345,7 @@ public class FingerprintHomeActivity extends Activity {
 
     //检查设备系统及硬件是否支持
     private boolean deviceSupport(){
-        //系统版本过低
+       /* //系统版本过低
         if (Build.VERSION.SDK_INT < 23){
             Log.d(TAG,"device version too low!");
             return false;
@@ -326,7 +354,7 @@ public class FingerprintHomeActivity extends Activity {
         if (!fingerPrintManager.isHardwareDetected()){
             Log.d(TAG,"finger print hardware not support!");
             return false;
-        }
+        }*/
         return true;
     }
 
