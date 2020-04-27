@@ -1,4 +1,4 @@
-package com.finger.demo;
+package com.finger.demo.tcp;
 
 import android.util.Log;
 
@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import static com.finger.demo.FingerprintManager.MSG_TYPE_CMD_RESULT;
+import static com.finger.demo.tcp.TcpManager.MSG_TYPE_CMD_RESULT;
 
 public class TCP {
     private static final String TAG = "FingerTech-FingerNetTcp";
@@ -60,7 +60,7 @@ public class TCP {
                     continue;
             }
 //            Log.d(TAG, "receive: read_len = " + read_len);
-            int buffer_size = FingerprintManager.byteArrayToInt(temp_buf);
+            int buffer_size = TcpManager.byteArrayToInt(temp_buf);
             Log.d(TAG, "buffer_size or message type:" + buffer_size);
             if (buffer_size > MSG_TYPE_CMD_RESULT && buffer_size < 70000) {
                 byte[] rec_buf = new byte[70000];

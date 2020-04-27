@@ -1,6 +1,7 @@
 package com.finger.demo;
 
 import android.app.Activity;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -11,6 +12,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.finger.demo.tcp.TcpManager;
 
 public class EnrollFingerprintActivity extends Activity {
 
@@ -33,7 +36,7 @@ public class EnrollFingerprintActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enroll_fingerprint);
 
-        fingerPrintManager = new FingerprintManager();
+        fingerPrintManager = this.getSystemService(FingerprintManager.class);
         tvEnrollFingerprintHint = (TextView) findViewById(R.id.tv_enroll_fingerprint_hint);
         btnTouchSensor = (Button) findViewById(R.id.btn_touch_sensor);
         enrollProgress = (ProgressBar) findViewById(R.id.pro_enroll_fingerprint_progress);
@@ -41,6 +44,7 @@ public class EnrollFingerprintActivity extends Activity {
 
         handler = new MyHandler();
 
+        fingerPrintManager.setActiveUser(UserHandle.myUserId());
         fingerPrintManager.preEnroll();
 
         cancellationSignal = new CancellationSignal();
@@ -71,12 +75,12 @@ public class EnrollFingerprintActivity extends Activity {
 
         //此数组暂时拿不到，通过修改so库跳过这部分检验，现在随便传参即可
         byte[] bytes = new byte[100];
-        fingerPrintManager.enroll(bytes,cancellationSignal,0, 0,enrollmentCallback);
+        fingerPrintManager.enroll(bytes,cancellationSignal,0, UserHandle.myUserId(),enrollmentCallback);
 
         btnTouchSensor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fingerPrintManager.touchSensor();
+                TcpManager.getInstance().touchSensor();
             }
         });
 

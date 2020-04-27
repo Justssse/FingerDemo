@@ -1,8 +1,7 @@
-package com.finger.demo;
+package com.finger.demo.tcp;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -12,14 +11,14 @@ import android.util.Log;
 
 import java.lang.ref.WeakReference;
 
-public class FingerprintManager {
-    private static final String TAG = "FingerTech-Manager";
+public class TcpManager {
+    private static final String TAG = "TcpManager";
 
-    private static final int FINGER_DOWN = 0x100;
-    private static final int FINGER_UP = 0x101;
-    private static final int PRE_ENROLL = 0X102;
-    private static final int POST_ENROLL = 0x103;
-    private static final int TOUCH_SENSOR = 0x104;
+    private static final int FINGER_DOWN = 0x100; //256
+    private static final int FINGER_UP = 0x101; //257
+    private static final int PRE_ENROLL = 0X102; //258
+    private static final int POST_ENROLL = 0x103; //259
+    private static final int TOUCH_SENSOR = 0x104; //260
 
     private static final int ENROLL = 0x200; //512
     public static final int AUTH = 0x201; //513
@@ -53,6 +52,7 @@ public class FingerprintManager {
     private static final int TCP_PORT = 18938;
     private static final int ATTEMPT_LIMIT = 3;
 
+    static TcpManager tcpManager;
     private EnrollmentCallback mEnrollmentCallback;
     private RemovalCallback mRemovalCallback;
     private AuthenticationCallback mAuthenticationCallback;
@@ -69,12 +69,23 @@ public class FingerprintManager {
     public static String TCP_IP = "";
     private boolean isAuthOrEnrollReady = true;
 
+    public static TcpManager getInstance(){
+        if (tcpManager == null){
+            synchronized (TcpManager.class){
+                if (tcpManager == null){
+                    tcpManager = new TcpManager();
+                }
+            }
+        }
+        return tcpManager;
+    }
+
     /**
      * @Author chenls
      * @Time 19-12-16 下午2:37
      * @Description 初始化TCP，创建TCP发送和接受线程
      */
-    FingerprintManager() {
+    public TcpManager() {
         Log.d(TAG, "FingerprintManager init");
         mTCP = new TCP();
         mainHandler = new MainHandler(Looper.getMainLooper());
@@ -126,9 +137,9 @@ public class FingerprintManager {
             public void onCancel() {
                 if (!hasFingerUp) {
                     hasFingerUp = true;
-                    FingerprintManager.this.sendCmd(FINGER_UP, 0);
+                    TcpManager.this.sendCmd(FINGER_UP, 0);
                 }
-                FingerprintManager.this.sendCmd(CANCEL, 0);
+                TcpManager.this.sendCmd(CANCEL, 0);
                 mEnrollmentCallback = null;
                 isAuthOrEnrollReady = true;
             }
@@ -139,7 +150,7 @@ public class FingerprintManager {
         sendCmd(POST_ENROLL, 0);
     }
 
-    void touchSensor(){
+    public void touchSensor(){
         sendCmd(TOUCH_SENSOR,0);
     }
 
@@ -193,7 +204,7 @@ public class FingerprintManager {
         cancel.setOnCancelListener(new CancellationSignal.OnCancelListener() {
             @Override
             public void onCancel() {
-                FingerprintManager.this.sendCmd(CANCEL, 0);
+                TcpManager.this.sendCmd(CANCEL, 0);
                 mAuthenticationCallback = null;
                 isAuthOrEnrollReady = true;
             }
@@ -212,6 +223,10 @@ public class FingerprintManager {
 
     public void remove(Fingerprint fp, int userId, RemovalCallback callback) {
         mRemovalCallback = callback;
+        sendCmd(REMOVE, fp.getFingerId());
+    }
+
+    public void remove(Fingerprint fp, int userId) {
         sendCmd(REMOVE, fp.getFingerId());
     }
 
@@ -250,7 +265,7 @@ public class FingerprintManager {
     }
 
     private void sendCmd(int what, int arg) {
-        sendCmd(what, arg, FingerprintManager.ATTEMPT_LIMIT, null);
+        sendCmd(what, arg, TcpManager.ATTEMPT_LIMIT, null);
     }
 
     private void sendCmd(final int what, final int arg, final int attemptLimit, final Object object) {
@@ -394,7 +409,7 @@ public class FingerprintManager {
                 case MSG_TYPE_ACK:
                     mainHandler.removeCallbacks(overtimeRunnable);
                     if (msg.arg1 == -1 && msg.arg2 == -1) {
-                        Log.e(TAG, "send what = " + last_msg.what + "failed!!!");
+                        Log.e(TAG, "send what = " + last_msg.what + "   failed!!!");
                         mTCP.disconnect();
                         sendCmd(last_msg.what, last_msg.arg1, last_msg.arg2, last_msg.obj);
                     } else {
@@ -497,9 +512,8 @@ public class FingerprintManager {
                         if (TCP_IP.isEmpty()) {
                             TCP_IP = "127.0.0.1";
                         }
-                        Log.d(TAG, "connect ip:" + TCP_IP);
                         mTCP.connect(TCP_IP, TCP_PORT);
-                        Log.d(TAG, "TCP connected!");
+                        Log.d(TAG, "TCP connected, ip: " + TCP_IP + " port: " + TCP_PORT);
 
                         sendTCPMessage(msg);
                     } catch (Exception e) {
@@ -531,7 +545,7 @@ public class FingerprintManager {
                         if (recBuffer == null) {
                             continue;
                         }
-                        int buffer_size = FingerprintManager.byteArrayToInt(recBuffer);
+                        int buffer_size = TcpManager.byteArrayToInt(recBuffer);
                         if (buffer_size > MSG_TYPE_CMD_RESULT && buffer_size < 70000) {
                             byte[] typeBuffer = new byte[4];
                             System.arraycopy(recBuffer, 4, typeBuffer, 0, 4);
