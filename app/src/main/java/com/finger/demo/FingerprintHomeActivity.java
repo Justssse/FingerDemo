@@ -154,7 +154,7 @@ public class FingerprintHomeActivity extends Activity {
         fingerprints = fingerPrintManager.getEnrolledFingerprints();
 
         if (fingerprints != null && fingerprints.size() > 0){
-            if (fingerprints.size() >= 100){
+            if (fingerprints.size() >= MAX_FINGERPRINT_NUM){
                 mBtnEnroll.setEnabled(false);
                 mBtnEnroll.setText(String.format(getString(R.string.enroll_fingerprint_max_num),MAX_FINGERPRINT_NUM));
             }else {
@@ -208,13 +208,6 @@ public class FingerprintHomeActivity extends Activity {
     void ensureRemove(Fingerprint fingerprint){
 
 //        fingerPrintManager.remove(fingerprint, UserHandle.myUserId(),removalCallback);
-//        mRvFingerprintList.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                handler.obtainMessage(FINGERPRINT_REMOVE_SUCCESS).sendToTarget();
-//            }
-//        },300);
-
         TcpManager.getInstance().remove(fingerprint, 0);
 
     }

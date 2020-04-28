@@ -25,8 +25,8 @@ public class FingerPrintAdapter extends RecyclerView.Adapter<FingerPrintAdapter.
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvFingerprintName = (TextView) itemView.findViewById(R.id.tv_fringerprint_name);
-            btnDelete = (Button) itemView.findViewById(R.id.btn_delete_fringerprint);
+            tvFingerprintName = (TextView) itemView.findViewById(R.id.tv_fingerprint_name);
+            btnDelete = (Button) itemView.findViewById(R.id.btn_delete_fingerprint);
         }
     }
 
@@ -41,7 +41,9 @@ public class FingerPrintAdapter extends RecyclerView.Adapter<FingerPrintAdapter.
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         final Fingerprint fingerprint = fingerprintList.get(position);
-        holder.tvFingerprintName.setText(fingerprint.getName());
+        holder.tvFingerprintName.setText(
+                String.format("%s    fid: %d   gid: %d   device: %d",fingerprint.getName(),fingerprint.getFingerId(),fingerprint.getGroupId(),fingerprint.getDeviceId())
+        );
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
