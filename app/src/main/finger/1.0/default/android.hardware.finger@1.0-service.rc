@@ -1,0 +1,4 @@
+service finger_service /vendor/bin/hw/android.hardware.finger@1.0-service
+    class hal
+    user system
+    group system

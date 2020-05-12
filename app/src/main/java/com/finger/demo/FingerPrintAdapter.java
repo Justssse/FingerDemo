@@ -1,14 +1,13 @@
 package com.finger.demo;
 
 import android.hardware.fingerprint.Fingerprint;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +41,7 @@ public class FingerPrintAdapter extends RecyclerView.Adapter<FingerPrintAdapter.
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         final Fingerprint fingerprint = fingerprintList.get(position);
         holder.tvFingerprintName.setText(
-                String.format("%s    fid: %d   gid: %d   device: %d",fingerprint.getName(),fingerprint.getFingerId(),fingerprint.getGroupId(),fingerprint.getDeviceId())
+                String.format("%s",fingerprint.getName())
         );
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override

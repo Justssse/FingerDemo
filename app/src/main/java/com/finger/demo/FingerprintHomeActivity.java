@@ -1,17 +1,10 @@
 package com.finger.demo;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.fingerprint.Fingerprint;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +12,10 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -109,21 +106,21 @@ public class FingerprintHomeActivity extends Activity {
             }
         };
 
-        removalCallback = new FingerprintManager.RemovalCallback() {
-            @Override
-            public void onRemovalError(Fingerprint fp, int errMsgId, CharSequence errString) {
-                Toast.makeText(context,R.string.delete_fail,Toast.LENGTH_SHORT).show();
-                Log.d(TAG,"delete fingerprint error: " + errString);
-            }
-
-            @Override
-            public void onRemovalSucceeded(Fingerprint fingerprint) {
-                handler.obtainMessage(FINGERPRINT_REMOVE_SUCCESS).sendToTarget();
-                Toast.makeText(context,R.string.delete_success,Toast.LENGTH_SHORT).show();
-                Log.d(TAG,"delete fingerprint success: " + fingerprint.getName());
-            }
-
-        };
+//        removalCallback = new FingerprintManager.RemovalCallback() {
+//            @Override
+//            public void onRemovalError(Fingerprint fp, int errMsgId, CharSequence errString) {
+//                Toast.makeText(context,R.string.delete_fail,Toast.LENGTH_SHORT).show();
+//                Log.d(TAG,"delete fingerprint error: " + errString);
+//            }
+//
+//            @Override
+//            public void onRemovalSucceeded(Fingerprint fingerprint) {
+//                handler.obtainMessage(FINGERPRINT_REMOVE_SUCCESS).sendToTarget();
+//                Toast.makeText(context,R.string.delete_success,Toast.LENGTH_SHORT).show();
+//                Log.d(TAG,"delete fingerprint success: " + fingerprint.getName());
+//            }
+//
+//        };
 
         if(!deviceSupport()){
             mRvFingerprintList.setVisibility(View.GONE);
@@ -229,7 +226,7 @@ public class FingerprintHomeActivity extends Activity {
                     return;
                 }
                 if (!fingerprint.getName().equals(newName)){
-                    ensureRename(fingerprint.getFingerId(), newName);
+//                    ensureRename(fingerprint.getFingerId(), newName);
                 }
             }
         });
@@ -256,12 +253,12 @@ public class FingerprintHomeActivity extends Activity {
 
     //主界面提示当前识别的手指
     void highLightItem(Fingerprint fingerprint){
-        for (int i = 0; i < fingerprints.size(); i++) {
-            Fingerprint tmp = fingerprints.get(i);
-            if (fingerprint.getFingerId() == tmp.getFingerId()){
-                Toast.makeText(context,"当前触摸指纹：" + tmp.getName(),Toast.LENGTH_SHORT).show();
-            }
-        }
+//        for (int i = 0; i < fingerprints.size(); i++) {
+//            Fingerprint tmp = fingerprints.get(i);
+//            if (fingerprint.getFingerId() == tmp.getFingerId()){
+//                Toast.makeText(context,"当前触摸指纹：" + tmp.getName(),Toast.LENGTH_SHORT).show();
+//            }
+//        }
     }
 
     //跳转至指纹录入界面

@@ -1,11 +1,13 @@
 package com.finger.demo;
 
 import android.app.Activity;
+import android.hardware.finger.V1_0.IFinger;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +32,7 @@ public class EnrollFingerprintActivity extends Activity {
     private TextView tvEnrollFingerprintHint;
     Button btnTouchSensor;
     private ProgressBar enrollProgress;
+    IFinger iFingerService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,10 +80,23 @@ public class EnrollFingerprintActivity extends Activity {
         byte[] bytes = new byte[100];
         fingerPrintManager.enroll(bytes,cancellationSignal,0, UserHandle.myUserId(),enrollmentCallback);
 
+        try {
+            iFingerService = IFinger.getService();
+        }catch (RemoteException e){
+            e.printStackTrace();
+        }
+
         btnTouchSensor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 TcpManager.getInstance().touchSensor();
+                if (iFingerService !=null){
+                    try {
+                        tvEnrollFingerprintHint.setText(iFingerService.test("测试测试"));
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
 
