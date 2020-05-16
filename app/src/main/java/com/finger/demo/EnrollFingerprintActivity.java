@@ -1,7 +1,9 @@
 package com.finger.demo;
 
 import android.app.Activity;
-import android.hardware.finger.V1_0.IFinger;
+
+import android.hardware.finger.V1_0.IFingerprintCallback;
+import android.hardware.finger.V1_0.IFingerprintTest;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -14,6 +16,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 import com.finger.demo.tcp.TcpManager;
 
@@ -29,10 +33,12 @@ public class EnrollFingerprintActivity extends Activity {
     private FingerprintManager.EnrollmentCallback enrollmentCallback;
     private Handler handler;
 
+    private IFingerprintTest mFingerprintTest;
+    private IFingerprintCallback mFingerprintCallback;
+
     private TextView tvEnrollFingerprintHint;
     Button btnTouchSensor;
     private ProgressBar enrollProgress;
-    IFinger iFingerService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,19 +87,31 @@ public class EnrollFingerprintActivity extends Activity {
         fingerPrintManager.enroll(bytes,cancellationSignal,0, UserHandle.myUserId(),enrollmentCallback);
 
         try {
-            iFingerService = IFinger.getService();
-        }catch (RemoteException e){
+            mFingerprintTest = IFingerprintTest.getService();
+            if (mFingerprintTest == null) {
+                Log.d(TAG,"Could not get IFingerprintTest service");
+            }
+
+            mFingerprintCallback = new IFingerprintCallback.Stub() {
+                @Override
+                public void onResult(final ArrayList<Byte> buffer) {
+                    Log.d(TAG,"onResult: " + buffer);
+                }
+            };
+        } catch (RemoteException e) {
             e.printStackTrace();
         }
 
         btnTouchSensor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TcpManager.getInstance().touchSensor();
-                if (iFingerService !=null){
+                // TcpManager.getInstance().touchSensor();
+                if (mFingerprintTest != null) {
                     try {
-                        tvEnrollFingerprintHint.setText(iFingerService.test("测试测试"));
-                    } catch (RemoteException e) {
+                        byte[] what = int2BytesArray(0x104);
+                        ArrayList<Byte> buffer = getInfoListFromBytes(what);
+                        mFingerprintTest.sendMessage(buffer, mFingerprintCallback);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -132,6 +150,37 @@ public class EnrollFingerprintActivity extends Activity {
         fingerPrintManager.postEnroll();
         setResult(RESULT_OK);
         finish();
+    }
+
+    public ArrayList<Byte> getInfoListFromBytes(byte[] bytes) {
+        ArrayList<Byte> list = new ArrayList<>();
+        for (byte b : bytes) {
+            list.add(b);
+        }
+        return list;
+    }
+
+    public byte[] getInfoBytesFromObject(ArrayList<Byte> list) {
+        int i = 0;
+        byte[] bytes = new byte[list.size()];
+        for (Byte b : list)
+            bytes[i++] = b;
+        return bytes;
+    }
+
+    public byte[] int2BytesArray(int n) {
+        byte[] b = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            b[i] = (byte) (n >> (i * 8));
+        }
+        return b;
+    }
+
+    public int byteArrayToInt(byte[] b) {
+        return b[0] & 0xFF |
+                (b[1] & 0xFF) << 8 |
+                (b[2] & 0xFF) << 16 |
+                (b[3] & 0xFF) << 24;
     }
 
 }
