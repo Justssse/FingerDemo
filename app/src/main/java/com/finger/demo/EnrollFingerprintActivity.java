@@ -17,9 +17,9 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import com.finger.demo.tcp.TcpManager;
+
+import java.util.ArrayList;
 
 public class EnrollFingerprintActivity extends Activity {
 
@@ -86,35 +86,45 @@ public class EnrollFingerprintActivity extends Activity {
         byte[] bytes = new byte[100];
         fingerPrintManager.enroll(bytes,cancellationSignal,0, UserHandle.myUserId(),enrollmentCallback);
 
-        try {
-            mFingerprintTest = IFingerprintTest.getService();
-            if (mFingerprintTest == null) {
-                Log.d(TAG,"Could not get IFingerprintTest service");
-            }
-
-            mFingerprintCallback = new IFingerprintCallback.Stub() {
-                @Override
-                public void onResult(final ArrayList<Byte> buffer) {
-                    Log.d(TAG,"onResult: " + buffer);
+        if (Constant.USE_HIDL){
+            try {
+                mFingerprintTest = IFingerprintTest.getService();
+                if (mFingerprintTest == null) {
+                    Log.d(TAG,"Could not get IFingerprintTest service");
                 }
-            };
-        } catch (RemoteException e) {
-            e.printStackTrace();
+
+                mFingerprintCallback = new IFingerprintCallback.Stub() {
+                    @Override
+                    public void onResult(final ArrayList<Byte> buffer) {
+                        Log.d(TAG,"onResult: " + buffer);
+                    }
+                };
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
 
         btnTouchSensor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TcpManager.getInstance().touchSensor();
-                if (mFingerprintTest != null) {
-                    try {
-                        byte[] what = int2BytesArray(0x104);
-                        ArrayList<Byte> buffer = getInfoListFromBytes(what);
-                        mFingerprintTest.sendMessage(buffer, mFingerprintCallback);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                if (Constant.USE_HIDL){
+                    if (mFingerprintTest != null) {
+                        try {
+                            byte[] what = int2BytesArray(0x104);
+                            ArrayList<Byte> buffer = getInfoListFromBytes(what);
+                            mFingerprintTest.sendMessage(buffer, mFingerprintCallback);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }else {
+                        Log.d(TAG,"mFingerprintTest is null");
                     }
+                    tvEnrollFingerprintHint.setText("当前为HIDL模式");
+                }else {
+                    TcpManager.getInstance().touchSensor();
+                    tvEnrollFingerprintHint.setText("当前为TCP模式");
                 }
+
             }
         });
 
