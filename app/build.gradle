@@ -15,13 +15,13 @@ android {
         debug {
             keyAlias 'myrelease'
             keyPassword '888888'
-            storeFile file('D:/Android/keystore/release.keystore')
+            storeFile file('../app/src/main/release.keystore')
             storePassword '888888'
         }
         release {
             keyAlias 'myrelease'
             keyPassword '888888'
-            storeFile file('D:/Android/keystore/release.keystore')
+            storeFile file('../app/src/main/release.keystore')
             storePassword '888888'
         }
     }
