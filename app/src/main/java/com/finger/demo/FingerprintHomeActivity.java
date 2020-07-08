@@ -106,21 +106,21 @@ public class FingerprintHomeActivity extends Activity {
             }
         };
 
-//        removalCallback = new FingerprintManager.RemovalCallback() {
-//            @Override
-//            public void onRemovalError(Fingerprint fp, int errMsgId, CharSequence errString) {
-//                Toast.makeText(context,R.string.delete_fail,Toast.LENGTH_SHORT).show();
-//                Log.d(TAG,"delete fingerprint error: " + errString);
-//            }
-//
-//            @Override
-//            public void onRemovalSucceeded(Fingerprint fingerprint) {
-//                handler.obtainMessage(FINGERPRINT_REMOVE_SUCCESS).sendToTarget();
-//                Toast.makeText(context,R.string.delete_success,Toast.LENGTH_SHORT).show();
-//                Log.d(TAG,"delete fingerprint success: " + fingerprint.getName());
-//            }
-//
-//        };
+        removalCallback = new FingerprintManager.RemovalCallback() {
+            @Override
+            public void onRemovalError(Fingerprint fp, int errMsgId, CharSequence errString) {
+                Toast.makeText(context,R.string.delete_fail,Toast.LENGTH_SHORT).show();
+                Log.d(TAG,"delete fingerprint error: " + errString);
+            }
+
+            @Override
+            public void onRemovalSucceeded(Fingerprint fp, int remaining) {
+                handler.obtainMessage(FINGERPRINT_REMOVE_SUCCESS).sendToTarget();
+                Toast.makeText(context,R.string.delete_success,Toast.LENGTH_SHORT).show();
+                Log.d(TAG,"delete fingerprint success: " + fp.getName());
+            }
+
+        };
 
         if(!deviceSupport()){
             mRvFingerprintList.setVisibility(View.GONE);
@@ -204,8 +204,8 @@ public class FingerprintHomeActivity extends Activity {
     //确认删除操作
     void ensureRemove(Fingerprint fingerprint){
 
-//        fingerPrintManager.remove(fingerprint, UserHandle.myUserId(),removalCallback);
-        TcpManager.getInstance().remove(fingerprint, 0);
+        fingerPrintManager.remove(fingerprint, UserHandle.myUserId(),removalCallback);
+//        TcpManager.getInstance().remove(fingerprint, 0);
 
     }
 
@@ -226,7 +226,7 @@ public class FingerprintHomeActivity extends Activity {
                     return;
                 }
                 if (!fingerprint.getName().equals(newName)){
-//                    ensureRename(fingerprint.getFingerId(), newName);
+                    ensureRename(fingerprint.getFingerId(), newName);
                 }
             }
         });
@@ -253,12 +253,12 @@ public class FingerprintHomeActivity extends Activity {
 
     //主界面提示当前识别的手指
     void highLightItem(Fingerprint fingerprint){
-//        for (int i = 0; i < fingerprints.size(); i++) {
-//            Fingerprint tmp = fingerprints.get(i);
-//            if (fingerprint.getFingerId() == tmp.getFingerId()){
-//                Toast.makeText(context,"当前触摸指纹：" + tmp.getName(),Toast.LENGTH_SHORT).show();
-//            }
-//        }
+        for (int i = 0; i < fingerprints.size(); i++) {
+            Fingerprint tmp = fingerprints.get(i);
+            if (fingerprint.getFingerId() == tmp.getFingerId()){
+                Toast.makeText(context,"当前触摸指纹：" + tmp.getName(),Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     //跳转至指纹录入界面

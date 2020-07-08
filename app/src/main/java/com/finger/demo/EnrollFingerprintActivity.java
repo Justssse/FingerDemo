@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.finger.demo.tcp.TcpManager;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class EnrollFingerprintActivity extends Activity {
@@ -82,9 +83,10 @@ public class EnrollFingerprintActivity extends Activity {
             }
         };
 
-        //此数组暂时拿不到，通过修改so库跳过这部分检验，现在随便传参即可
-        byte[] bytes = new byte[100];
-        fingerPrintManager.enroll(bytes,cancellationSignal,0, UserHandle.myUserId(),enrollmentCallback);
+        ByteBuffer buffer = ByteBuffer.allocate(69);
+        buffer.put(new byte[25]);
+        buffer.putInt(0xffffffff);
+        fingerPrintManager.enroll(buffer.array(),cancellationSignal,0, UserHandle.myUserId(),enrollmentCallback);
 
         if (Constant.USE_HIDL){
             try {

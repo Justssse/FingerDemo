@@ -12,12 +12,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
-        debug {
-            keyAlias 'myrelease'
-            keyPassword '888888'
-            storeFile file('../app/src/main/release.keystore')
-            storePassword '888888'
-        }
         release {
             keyAlias 'myrelease'
             keyPassword '888888'
@@ -29,6 +23,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
